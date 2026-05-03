@@ -7,7 +7,7 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
     .page {
-      width: 800px;   /* A4 width approx */
+      max-width: 800px;   /* Desktop width */
       margin: auto;
       padding: 20px;
       border: 1px solid #333;
@@ -22,6 +22,15 @@
     .footer { text-align:center; border-top: 2px solid #333; margin-top: 20px; padding-top: 10px; font-size: 12px; }
     .btn { margin-top: 10px; padding: 8px 12px; }
     #invoiceSection { display: none; } /* Initially hidden until login */
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .page { width: 95%; padding: 10px; }
+      .header img { width:60px; }
+      .invoice-details td { font-size: 14px; }
+      .btn { width: 100%; margin-top: 8px; }
+    }
+
     @media print {
       .btn, form { display: none; }
       .page { border: none; }
@@ -59,6 +68,7 @@
       </form>
 
       <div id="invoiceOutput"></div>
+      <button onclick="printInvoice()" class="btn">🖨️ Print Invoice</button>
     </div>
 
     <div class="footer">
@@ -68,7 +78,7 @@
   </div>
 
   <script>
-    // Updated Trainer Login Credentials
+    // Trainer Login Credentials
     const trainers = {
       "Kartik": "Kartik2253",
       "Trainer": "MNYT101",
@@ -76,6 +86,7 @@
     };
 
     let loggedTrainer = "";
+    let currentInvoice = {};
 
     function login(){
       let user = document.getElementById("username").value.trim();
@@ -108,8 +119,8 @@
       let hash = btoa(invoiceNo + "|" + name + "|" + regNo + "|" + location + "|" + amount + "|" + loggedTrainer);
 
       // Save to localStorage
-      let record = {invoiceNo, name, regNo, location, service, amount, date, trainer: loggedTrainer, hash};
-      localStorage.setItem(invoiceNo, JSON.stringify(record));
+      currentInvoice = {invoiceNo, name, regNo, location, service, amount, date, trainer: loggedTrainer, hash};
+      localStorage.setItem(invoiceNo, JSON.stringify(currentInvoice));
       localStorage.setItem("invoiceCounter", ++invoiceCounter);
 
       // Display Invoice
@@ -131,9 +142,11 @@
       document.getElementById("invoiceOutput").innerHTML = output;
 
       new QRCode(document.getElementById("qrcode"), invoiceNo + "|" + amount + "|" + hash);
-
-      window.print();
     });
+
+    function printInvoice(){
+      window.print();
+    }
   </script>
 </body>
 </html>
