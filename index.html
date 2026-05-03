@@ -2,159 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maa Narmada Yoga - Invoice Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <title>Generate Invoice - Maa Narmada Yoga</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    .page {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #333;
-      background: #fff;
-    }
-    .header { text-align:center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .header { text-align:center; margin-bottom:20px; }
     .header img { width:80px; }
     .header p { margin: 5px 0; }
-    .invoice-details { margin-bottom: 20px; }
-    .invoice-details table { width:100%; border-collapse: collapse; }
-    .invoice-details td { padding: 6px; }
-    .footer { text-align:center; border-top: 2px solid #333; margin-top: 20px; padding-top: 10px; font-size: 12px; }
+    .form-group { margin-bottom: 10px; }
     .btn { margin-top: 10px; padding: 8px 12px; }
-    #invoiceSection { display: none; }
 
     @media (max-width: 600px) {
-      .page { width: 95%; padding: 10px; }
+      body { margin: 10px; }
       .header img { width:60px; }
-      .invoice-details td { font-size: 14px; }
       .btn { width: 100%; margin-top: 8px; }
+    }
+
+    @media print {
+      .btn, input, button { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="header">
-      <img src="logo.png" alt="Maa Narmada Yoga Logo">
-      <h2>Maa Narmada Yoga Bhopal</h2>
-      <p><strong>Official Invoice</strong></p>
-      <p>📞 Contact: 7415602011</p>
-    </div>
-
-    <!-- Login Section -->
-    <div id="loginSection">
-      <h3>Trainer Login</h3>
-      <label>Username:</label> <input type="text" id="username" required><br><br>
-      <label>Password:</label> <input type="password" id="password" required><br><br>
-      <button onclick="login()" class="btn">Login</button>
-      <p id="loginMsg" style="color:red;"></p>
-    </div>
-
-    <!-- Invoice Section -->
-    <div id="invoiceSection">
-      <h3>Invoice Generator</h3>
-      <form id="invoiceForm">
-        <label>Name:</label> <input type="text" id="name" required><br><br>
-        <label>Registration No:</label> <input type="text" id="regNo" required><br><br>
-        <label>Class Location:</label> <input type="text" id="location" required><br><br>
-        <label>Service/Month:</label> <input type="text" id="service" required><br><br>
-        <label>Amount:</label> <input type="number" id="amount" required><br><br>
-        <button type="submit" class="btn">Generate Invoice</button>
-      </form>
-
-      <div id="invoiceOutput"></div>
-      <button onclick="downloadPDF()" class="btn">📄 Download PDF</button>
-    </div>
-
-    <div class="footer">
-      <p>Thank you for choosing Maa Narmada Yoga Bhopal</p>
-      <p>📞 For queries call: 7415602011</p>
-    </div>
+  <div class="header">
+    <img src="logo.png" alt="Maa Narmada Yoga Logo">
+    <h2>Maa Narmada Yoga Bhopal</h2>
+    <p>📞 Contact: 7415602011</p>
   </div>
 
+  <h3>Generate Invoice</h3>
+  <div class="form-group">
+    Invoice No: <input type="text" id="invoiceNo" required>
+  </div>
+  <div class="form-group">
+    Name: <input type="text" id="name" required>
+  </div>
+  <div class="form-group">
+    Registration No: <input type="text" id="regNo" required>
+  </div>
+  <div class="form-group">
+    Class Location: <input type="text" id="location" required>
+  </div>
+  <div class="form-group">
+    Service/Month: <input type="text" id="service" required>
+  </div>
+  <div class="form-group">
+    Amount: <input type="number" id="amount" required>
+  </div>
+  <div class="form-group">
+    Date: <input type="date" id="date" required>
+  </div>
+  <div class="form-group">
+    Trainer: <input type="text" id="trainer" required>
+  </div>
+
+  <button onclick="generateInvoice()" class="btn">Generate & Save</button>
+
   <script>
-    const trainers = {
-      "Kartik": "Kartik2253",
-      "Trainer": "MNYT101",
-      "Admin": "MNYA7794"
-    };
+    function generateInvoice(){
+      let record = {
+        invoiceNo: document.getElementById("invoiceNo").value.trim(),
+        name: document.getElementById("name").value.trim(),
+        regNo: document.getElementById("regNo").value.trim(),
+        location: document.getElementById("location").value.trim(),
+        service: document.getElementById("service").value.trim(),
+        amount: document.getElementById("amount").value.trim(),
+        date: document.getElementById("date").value.trim(),
+        trainer: document.getElementById("trainer").value.trim()
+      };
 
-    let loggedTrainer = "";
-    let currentInvoice = {};
+      // Hash generate
+      record.hash = btoa(
+        record.invoiceNo + "|" + record.name + "|" + record.regNo + "|" + record.location + "|" + record.amount + "|" + record.trainer
+      );
 
-    function login(){
-      let user = document.getElementById("username").value.trim();
-      let pass = document.getElementById("password").value.trim();
-      if(trainers[user] && trainers[user] === pass){
-        loggedTrainer = user;
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("invoiceSection").style.display = "block";
-      } else {
-        document.getElementById("loginMsg").innerText = "❌ Invalid Username or Password";
-      }
-    }
+      // Save invoice with both keys (InvoiceNo & RegNo)
+      let data = JSON.stringify(record);
+      localStorage.setItem(record.invoiceNo, data);
+      localStorage.setItem(record.regNo, data);
 
-    let invoiceCounter = localStorage.getItem("invoiceCounter") || 1;
-
-    document.getElementById("invoiceForm").addEventListener("submit", function(e){
-      e.preventDefault();
-
-      let name = document.getElementById("name").value;
-      let regNo = document.getElementById("regNo").value;
-      let location = document.getElementById("location").value;
-      let service = document.getElementById("service").value;
-      let amount = document.getElementById("amount").value;
-
-      let invoiceNo = "INV-" + String(invoiceCounter).padStart(3,'0');
-      let date = new Date().toLocaleDateString();
-
-      let hash = btoa(invoiceNo + "|" + name + "|" + regNo + "|" + location + "|" + amount + "|" + loggedTrainer);
-
-      currentInvoice = {invoiceNo, name, regNo, location, service, amount, date, trainer: loggedTrainer, hash};
-      localStorage.setItem(invoiceNo, JSON.stringify(currentInvoice));
-      localStorage.setItem("invoiceCounter", ++invoiceCounter);
-
-      let output = `
-        <div class="invoice-details" id="invoiceDetails">
-          <table>
-            <tr><td><strong>Invoice No:</strong></td><td>${invoiceNo}</td></tr>
-            <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
-            <tr><td><strong>Name:</strong></td><td>${name}</td></tr>
-            <tr><td><strong>Registration No:</strong></td><td>${regNo}</td></tr>
-            <tr><td><strong>Class Location:</strong></td><td>${location}</td></tr>
-            <tr><td><strong>Service/Month:</strong></td><td>${service}</td></tr>
-            <tr><td><strong>Amount:</strong></td><td>₹${amount}</td></tr>
-            <tr><td><strong>Generated By:</strong></td><td>${loggedTrainer}</td></tr>
-          </table>
-          <div id="qrcode"></div>
-        </div>
-      `;
-      document.getElementById("invoiceOutput").innerHTML = output;
-
-      new QRCode(document.getElementById("qrcode"), invoiceNo + "|" + amount + "|" + hash);
-    });
-
-    function downloadPDF(){
-      if(!currentInvoice.invoiceNo){
-        alert("No invoice generated yet!");
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      let invoiceElement = document.getElementById("invoiceDetails");
-
-      html2canvas(invoiceElement, { scale: 2 }).then(canvas => {
-        let imgData = canvas.toDataURL("image/png");
-        let pdf = new jsPDF("p", "mm", "a4");
-        let pageWidth = pdf.internal.pageSize.getWidth();
-        let imgWidth = pageWidth;
-        let imgHeight = canvas.height * imgWidth / canvas.width;
-
-        pdf.addImage(imgData, "PNG", 0, 10, imgWidth, imgHeight);
-        pdf.save(currentInvoice.invoiceNo + ".pdf");
-      });
+      alert("✅ Invoice saved successfully!\nYou can verify using Invoice No OR Registration No.");
     }
   </script>
 </body>
 </html>
-
