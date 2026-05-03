@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Maa Narmada Yoga - Invoice Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
     .page {
@@ -64,7 +62,6 @@
       </form>
 
       <div id="invoiceOutput"></div>
-      <button onclick="downloadPDF()" class="btn">📄 Download PDF</button>
     </div>
 
     <div class="footer">
@@ -82,6 +79,9 @@
 
     let loggedTrainer = "";
     let currentInvoice = {};
+
+    // 🔗 Google Apps Script Web App URL (replace with your own)
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxYOUR_SCRIPT_ID/exec";
 
     function login(){
       let user = document.getElementById("username").value.trim();
@@ -116,7 +116,7 @@
       localStorage.setItem("invoiceCounter", ++invoiceCounter);
 
       let output = `
-        <div class="invoice-details" id="invoiceDetails">
+        <div class="invoice-details">
           <table>
             <tr><td><strong>Invoice No:</strong></td><td>${invoiceNo}</td></tr>
             <tr><td><strong>Date:</strong></td><td>${date}</td></tr>
@@ -133,26 +133,18 @@
       document.getElementById("invoiceOutput").innerHTML = output;
 
       new QRCode(document.getElementById("qrcode"), invoiceNo + "|" + amount + "|" + hash);
+
+      // 🔥 Save to Google Sheet
+      saveToGoogleSheet(currentInvoice);
     });
 
-    function downloadPDF(){
-      if(!currentInvoice.invoiceNo){
-        alert("No invoice generated yet!");
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      let invoiceElement = document.getElementById("invoiceDetails");
-
-      html2canvas(invoiceElement, { scale: 2 }).then(canvas => {
-        let imgData = canvas.toDataURL("image/png");
-        let pdf = new jsPDF("p", "mm", "a4");
-        let pageWidth = pdf.internal.pageSize.getWidth();
-        let imgWidth = pageWidth;
-        let imgHeight = canvas.height * imgWidth / canvas.width;
-
-        pdf.addImage(imgData, "PNG", 0, 10, imgWidth, imgHeight);
-        pdf.save(currentInvoice.invoiceNo + ".pdf");
-      });
+    function saveToGoogleSheet(record){
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(record)
+      })
+      .then(res => console.log("Saved to Google Sheet"))
+      .catch(err => console.error("Error:", err));
     }
   </script>
 </body>
