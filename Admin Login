@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Maa Narmada Yoga</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; }
+    .header { text-align:center; margin-bottom:20px; }
+    table { width:100%; border-collapse: collapse; margin-top:20px; }
+    th, td { border:1px solid #333; padding:8px; text-align:center; }
+    .btn { margin:5px; padding:6px 12px; }
+    #loginBox { text-align:center; margin-top:50px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="logo.png" width="80">
+    <h2>Maa Narmada Yoga Bhopal</h2>
+    <p>📞 Contact: 7415602011</p>
+  </div>
+
+  <div id="loginBox">
+    <h3>Trainer/Admin Login</h3>
+    <input type="text" id="username" placeholder="Username"><br><br>
+    <input type="password" id="password" placeholder="Password"><br><br>
+    <button onclick="login()" class="btn">🔑 Login</button>
+    <p id="loginMsg"></p>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <h3>Dashboard</h3>
+    <button onclick="loadData()" class="btn">🔄 Refresh Data</button>
+    <input type="text" id="search" placeholder="Search by Reg No/Invoice No">
+    <button onclick="searchData()" class="btn">🔍 Search</button>
+
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Invoice No</th><th>Name</th><th>Reg No</th>
+          <th>Location</th><th>Service</th><th>Amount</th>
+          <th>Date</th><th>Trainer</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbzt5rT59R2lEMGWrx0gHrSDvx7so08PIMS3nDG3FUddXMoZlirTkz-3IOXxovVEjuwOmg/exec";
+let loggedTrainer = "";
+
+// ✅ आपके credentials सेट कर दिए गए हैं
+const users = {
+  "admin": "MNYA7794",    // Admin login
+  "kartik": "Kartik2253", // Trainer Kartik
+  "trainer": "MNYT101"    // Generic Trainer
+};
+
+function login(){
+  let u = document.getElementById("username").value.trim().toLowerCase();
+  let p = document.getElementById("password").value.trim();
+  if(users[u] && users[u]===p){
+    loggedTrainer = (u==="admin") ? "Admin" : capitalize(u);
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    loadData();
+  } else {
+    document.getElementById("loginMsg").innerText="❌ Invalid login!";
+  }
+}
+
+function capitalize(str){ return str.charAt(0).toUpperCase()+str.slice(1); }
+
+function loadData(){
+  fetch(scriptURL+"?action=get")
+  .then(res=>res.json())
+  .then(data=>{
+    let tbody=document.querySelector("#dataTable tbody");
+    tbody.innerHTML="";
+    data.forEach(record=>{
+      if(loggedTrainer==="Admin" || record.trainer.toLowerCase()===loggedTrainer.toLowerCase()){
+        let row=`<tr>
+          <td>${record.invoiceNo}</td>
+          <td>${record.name}</td>
+          <td>${record.regNo}</td>
+          <td>${record.location}</td>
+          <td>${record.service}</td>
+          <td>₹${record.amount}</td>
+          <td>${record.date}</td>
+          <td>${record.trainer}</td>
+        </tr>`;
+        tbody.innerHTML+=row;
+      }
+    });
+  });
+}
+
+function searchData(){
+  let q=document.getElementById("search").value.trim().toLowerCase();
+  let rows=document.querySelectorAll("#dataTable tbody tr");
+  rows.forEach(r=>{
+    r.style.display=r.innerText.toLowerCase().includes(q)?"":"none";
+  });
+}
+</script>
+</body>
+</html>
