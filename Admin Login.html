@@ -6,23 +6,44 @@
   <style>
     body { font-family: Arial, sans-serif; margin:20px; }
     .header { text-align:center; margin-bottom:20px; }
+    .header img { max-width:80px; height:auto; }
     table { width:100%; border-collapse: collapse; margin-top:20px; }
-    th, td { border:1px solid #333; padding:8px; text-align:center; }
-    .btn { margin:5px; padding:6px 12px; }
+    th, td { border:1px solid #333; padding:8px; text-align:center; font-size:14px; }
+    .btn { margin:5px; padding:8px 14px; font-size:14px; cursor:pointer; }
     #loginBox { text-align:center; margin-top:50px; }
+    input { padding:8px; width:90%; max-width:300px; margin:5px auto; display:block; }
+
+    /* ✅ Responsive Design */
+    @media (max-width:768px){
+      body { margin:10px; font-size:14px; }
+      table, th, td { font-size:12px; }
+      .btn { padding:6px 10px; font-size:12px; }
+      .header h2 { font-size:18px; }
+      .header p { font-size:14px; }
+      #dashboard h3 { font-size:16px; }
+      input { width:95%; }
+    }
+
+    @media (max-width:480px){
+      table { display:block; overflow-x:auto; }
+      th, td { padding:6px; font-size:11px; }
+      .btn { padding:5px 8px; font-size:11px; }
+      .header h2 { font-size:16px; }
+      .header p { font-size:12px; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <img src="logo.png" width="80">
+    <img src="logo.png" alt="Logo">
     <h2>Maa Narmada Yoga Bhopal</h2>
     <p>📞 Contact: 7415602011</p>
   </div>
 
   <div id="loginBox">
     <h3>Trainer/Admin Login</h3>
-    <input type="text" id="username" placeholder="Username"><br><br>
-    <input type="password" id="password" placeholder="Password"><br><br>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
     <button onclick="login()" class="btn">🔑 Login</button>
     <p id="loginMsg"></p>
   </div>
@@ -49,11 +70,10 @@
 const scriptURL = "https://script.google.com/macros/s/AKfycbzt5rT59R2lEMGWrx0gHrSDvx7so08PIMS3nDG3FUddXMoZlirTkz-3IOXxovVEjuwOmg/exec";
 let loggedTrainer = "";
 
-// ✅ आपके credentials सेट कर दिए गए हैं
 const users = {
-  "admin": "MNYA7794",    // Admin login
-  "kartik": "Kartik2253", // Trainer Kartik
-  "trainer": "MNYT101"    // Generic Trainer
+  "admin": "MNYA7794",
+  "kartik": "Kartik2253",
+  "trainer": "MNYT101"
 };
 
 function login(){
