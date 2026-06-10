@@ -171,9 +171,15 @@ function esc(v) {
 }
 function formatDate(val) {
   if (!val) return "";
-  try { const d=new Date(val); if(!isNaN(d)) return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`; } catch(e) {}
+  try {
+    const d = new Date(val);
+    if (!isNaN(d)) {
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+  } catch(e) {}
   return val;
-}
+}}
 
 // ✅ Sheet column order ke anusaar: H=Date(7), I=AmountReceived(8), J=Trainer(9)
 function buildRows(data) {
