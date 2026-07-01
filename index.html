@@ -87,7 +87,7 @@ document.getElementById("invoiceForm").addEventListener("submit",function(e){
   let amount=document.getElementById("amount").value;
   let receivedDate=document.getElementById("receivedDate").value;
   let invoiceNo="INV-"+String(invoiceCounter).padStart(3,'0');
-  let date=new Date().toLocaleDateString();
+  let date=new Date().let date = new Date().toISOString().slice(0,10);  // "2026-07-01";
   let hash=btoa(invoiceNo+"|"+name+"|"+regNo+"|"+location+"|"+amount+"|"+loggedTrainer);
   
   currentInvoice={invoiceNo,name,regNo,location,service,amount,date,receivedDate,trainer:loggedTrainer,hash};
